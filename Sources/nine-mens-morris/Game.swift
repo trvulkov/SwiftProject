@@ -136,9 +136,9 @@ extension Game { // checking if the game can continue
     func canMove(_ color: Color) -> Bool {
         switch color {
             case .white: 
-                return white.positions.allSatisfy{ board.canMove(color: .white, from: $0) }
+                return white.positions.contains{ board.canMove(color: .white, from: $0) }
             case .black: 
-                return black.positions.allSatisfy{ board.canMove(color: .black, from: $0) }
+                return black.positions.contains{ board.canMove(color: .black, from: $0) }
         }        
     }
 
