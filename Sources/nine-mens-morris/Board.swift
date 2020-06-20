@@ -1,7 +1,8 @@
 class Board {
+    // the nodes are stored in a dictionary, with the keys being their coordinates on the board 
     let nodes: Dictionary<String, Node>
 
-    init() { // initialize nodes with their adjacent nodes listed in up-left-right-down order
+    init() { // initialize nodes with their adjacent nodes
         nodes = ["a7": Node(right: "d7", below: "a4"),      "d7": Node(left: "a7", right: "g7", below: "d6"),               "g7": Node(left: "d7", below: "g4"),
 
                  "b6": Node(right: "d6", below: "b4"),      "d6": Node(above: "d7", left: "b6", right: "f6", below: "d5"),  "f6": Node(left: "d6", below: "f4"),
@@ -50,6 +51,8 @@ extension Board: CustomStringConvertible {
 }
 
 extension Board { // game logic - manipulating pieces
+    // Places a piece of the given color, at the given position
+    // (if the position isn't actually on the board, or it is but is already occupied - an exception is thrown).
     func place(color: Color, at position: String) throws {
         guard let node = nodes[position] else {
             throw PlacingError.invalidPosition
@@ -61,6 +64,8 @@ extension Board { // game logic - manipulating pieces
         node.state = .occupied(by: color)
     }
 
+    // Moves a piece of a given color between two positions
+    // (if either of the positions isn't on the board, the first one isn't occupied by a piece of the given color, or the second one isn't empty - an exception is thrown).
     func move(color: Color, from: String, to: String, flying: Bool = false) throws {
         guard let start = nodes[from] else {
             throw MovingError.invalidMoveFrom
@@ -85,6 +90,9 @@ extension Board { // game logic - manipulating pieces
         end.state = .occupied(by: color)
     }
 
+    // Removes a piece of the color opposite to the given color (the player of a certain color removes pieces of the opposite color), from the given position
+    // (if the position isn't actually on the board, or there isn't a piece of the given color on it, an exception is thrown).
+    // If checkForMill is true, and an attempt is made to remove a piece that is currently in a mill, an exception is thrown.
     func remove(color: Color, from position: String, checkForMill: Bool) throws {
         guard let node = nodes[position] else {
             throw RemovingError.invalidPosition
@@ -104,6 +112,7 @@ extension Board { // game logic - manipulating pieces
         node.state = .empty
     }
 
+    // Checks if a piece of the given color can move from the given position (i.e. if there are any unoccupied positions adjacent to it).
     func canMove(color: Color, from position: String) -> Bool {
         if let node = nodes[position], node.state == .occupied(by: color) {
             for neighbour in node.adjacent {
@@ -118,6 +127,8 @@ extension Board { // game logic - manipulating pieces
 }
 
 extension Board { // game logic - mills
+    // Checks if a piece is in the middle of mill, i.e. if it forms a mill with two of it's neighbours (either the ones to the left and to the right, ot above and below).
+    // Only called by the inMill() function.
     private func middleOfMill(color: Color, node: Node) -> Bool {
         if let left = node.left, let leftNode = nodes[left], let right = node.right, let rightNode = nodes[right] {
             return leftNode.state == .occupied(by: color) && rightNode.state == .occupied(by: color)
@@ -128,6 +139,8 @@ extension Board { // game logic - mills
         return false
     }
 
+    // Checks if a piece forms a mill with a neighbour and that neighbour's neighbour in a given direction.
+    // Only called by the edgeOfMill() function.
     private func checkDirection(color: Color, direction: Direction, node: Node, found: Int = 1) -> Bool {
         if found == 3 {
             return true
@@ -140,11 +153,14 @@ extension Board { // game logic - mills
         return false
     }
 
+    // Checks if a piece is the edge of mill, i.e. if it forms a mill with a neighbour and that neighbour's neighbour in one of the four directions.
+    // Only called by the inMill() function.
     private func edgeOfMill(color: Color, node: Node) -> Bool {
         checkDirection(color: color, direction: .above, node: node) || checkDirection(color: color, direction: .left, node: node) ||
         checkDirection(color: color, direction: .right, node: node) || checkDirection(color: color, direction: .below, node: node)
     }
 
+    // Checks if a piece is in a mill, by calling the middleOfMill() and edgeOfMill() functions.
     func inMill(color: Color, position: String) -> Bool {
         if let node = nodes[position] {
             return middleOfMill(color: color, node: node) || edgeOfMill(color: color, node: node)

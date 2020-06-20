@@ -1,14 +1,15 @@
 class Game {
-    private var white = Pieces()
-    private var black = Pieces()
+    private var white = Pieces() // stores information about the white player's pieces
+    private var black = Pieces() // stores information about the black player's pieces
 
     private let board = Board()
     private var phase = Phase.placing
 
-    private var current = Color.white
+    private var current = Color.white // the player who should play on the current turn. Changes to the other color every turn
 }
 
 extension Game: CustomStringConvertible {
+    // allows the printing of information about the game at it's current stage - information about the players' pieces, and the state of the board itself
     var description: String {
         return """
         white: \(white.free) free, \(white.placed) placed, at \(white.positions)
@@ -20,6 +21,9 @@ extension Game: CustomStringConvertible {
 
 
 extension Game { // game actions
+    // Requests the coordinates of a single position, reads them from the standard input and calls Board.place() with the color of the current player and said position.
+    // Catches that function's exceptions and prints an approriate message if any one is caught.
+    // If the placement is successful, calls the Pieces.place() function of the current player and returns the position.
     func place() -> String {
         print("\(current) player, input coordinates to place piece at:")
 
@@ -47,6 +51,11 @@ extension Game { // game actions
         }
     }
 
+    // Requests the coordinates of two positions, reads a single line from the standard input and checks if it is of the appropriate length.
+    // If yes, also checks whether the current player can "fly" their pieces and calls Board.move() with the color of the current player, both positions,
+    // and an appropriate boolean value for the "flying".
+    // Catches that function's exceptions and prints an approriate message if any one is caught.
+    // If the movement is successful, calls the Pieces.move() function of the current player and returns the second position.
     func move() -> String {
         print("\(current) player, input coordinates of position to move piece from, and position to move piece to:")
 
@@ -93,6 +102,10 @@ extension Game { // game actions
         }
     }
 
+    // Requests the coordinates of a single position, reads them from the standard input and calls Board.remove() 
+    // with the color of the current player, the position and an appropriate boolean value determining whether pieces can be removed from mills or not.
+    // Catches that function's exceptions and prints an approriate message if any one is caught.
+    // If the removal is successful, calls the Pieces.remove() function of the other player.
     func remove() {
         print("\(current) player formed a mill - input coordinates to remove opponent's piece from:")
 
@@ -108,8 +121,8 @@ extension Game { // game actions
                     try board.remove(color: current, from: position, checkForMill: checkForMill)
 
                     switch current {
-                        case .white: black.losePiece(position)
-                        case .black: white.losePiece(position)
+                        case .white: black.remove(position)
+                        case .black: white.remove(position)
                     }
 
                     return
@@ -133,6 +146,7 @@ extension Game { // game actions
 }
 
 extension Game { // checking if the game can continue
+    // checks if the player of the given color can move at least one of their pieces
     func canMove(_ color: Color) -> Bool {
         switch color {
             case .white: 
@@ -142,6 +156,7 @@ extension Game { // checking if the game can continue
         }        
     }
 
+    // checks if the player of the given color can continue playing the game, i.e. if they have enough pieces and can move at least one
     func canPlay(_ color: Color) -> Bool {
         switch color {
             case .white: 
@@ -154,6 +169,11 @@ extension Game { // checking if the game can continue
 }
 
 extension Game { // game loop
+    // Requests information about which player should move first.
+    // After that, loops while the game can continue (both players have enough pieces and can move at least one of them), with each iteration
+    // calling either place() or move() depending on the phase of the game. If a mill is formed, calls remove().
+    // After the looping condition becomes false, prints an appropriate message for the end of the game, 
+    // describing who won and by what cause in the case of victory, or that the outcome is a draw.
     func loop() {
         var finishedReading = false
         repeat {
