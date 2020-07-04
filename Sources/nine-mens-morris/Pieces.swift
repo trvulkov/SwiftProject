@@ -3,7 +3,7 @@ class Pieces {
     var free: Int = 9   // how many pieces there are left to place
     var placed: Int = 0 // how many are currently on the board
 
-    var positions: [String] = [] // the positions of the pieces on the board
+    var positions: Set<String> = Set() // the positions of the pieces on the board
 }
 
 extension Pieces { // manipulating pieces
@@ -15,7 +15,7 @@ extension Pieces { // manipulating pieces
             free -= 1
             placed += 1
 
-            positions.append(position)
+            positions.insert(position)
         }
     }
 
@@ -24,13 +24,13 @@ extension Pieces { // manipulating pieces
         if placed > 0 {
             placed -= 1
 
-            positions.removeAll(where: {$0 == position})
+            positions.remove(position)
         }
     }
 
     // called by Game.move()
     func move(from: String, to: String) {
-        positions.removeAll(where: {$0 == from})
-        positions.append(to)
+        positions.remove(from)
+        positions.insert(to)
     }
 }
