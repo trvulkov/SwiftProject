@@ -129,27 +129,30 @@ extension Board { // game logic - manipulating pieces
 }
 
 extension Board { // game logic - mills
-    // Checks if a piece is in the middle of mill, i.e. if it forms a mill with two of it's neighbours (either the ones to the left and to the right, or above and below).
-    // Only called by the inMill() function.
-    private func middleOfMill(color: Color, node: Node) -> Bool {
-        if let left = node.left, let leftNode = nodes[left], let right = node.right, let rightNode = nodes[right] {
-            return leftNode.state == .occupied(by: color) && rightNode.state == .occupied(by: color)
-        } else if let above = node.above, let aboveNode = nodes[above], let below = node.below, let belowNode = nodes[below] {
-            return aboveNode.state == .occupied(by: color) && belowNode.state == .occupied(by: color)
+    // Checks if a piece is in a mill, by calling the middleOfMill() and edgeOfMill() functions.
+    func inMill(color: Color, position: String) -> Bool {
+        if let node = nodes[position] {
+            return middleOfMill(color: color, node: node) || edgeOfMill(color: color, node: node)
         }
 
         return false
     }
 
-    // Checks if a piece forms a mill with a neighbour and that neighbour's neighbour in a given direction.
-    // Only called by the edgeOfMill() function.
-    private func checkDirection(color: Color, direction: Direction, node: Node, found: Int = 1) -> Bool {
-        if found == 3 {
+    // Checks if a piece is in the middle of mill, i.e. if it forms a mill with two of it's neighbours (either the ones to the left and to the right, or above and below).
+    // Only called by the inMill() function.
+    private func middleOfMill(color: Color, node: Node) -> Bool {
+        // check for horizontal mill
+        if let left = node.left, let leftNode = nodes[left], 
+           let right = node.right, let rightNode = nodes[right], 
+           leftNode.state == .occupied(by: color) && rightNode.state == .occupied(by: color) {
             return true
-        }
-
-        if let neighbour = node.getNeighbour(direction: direction), let neighbourNode = nodes[neighbour] {
-            return neighbourNode.state == .occupied(by: color) && checkDirection(color: color, direction: direction, node: neighbourNode, found: found + 1)
+        } 
+        
+        // check for vertical mill
+        if let above = node.above, let aboveNode = nodes[above], 
+           let below = node.below, let belowNode = nodes[below],
+           aboveNode.state == .occupied(by: color) && belowNode.state == .occupied(by: color) {
+            return true
         }
 
         return false
@@ -162,10 +165,15 @@ extension Board { // game logic - mills
         checkDirection(color: color, direction: .right, node: node) || checkDirection(color: color, direction: .below, node: node)
     }
 
-    // Checks if a piece is in a mill, by calling the middleOfMill() and edgeOfMill() functions.
-    func inMill(color: Color, position: String) -> Bool {
-        if let node = nodes[position] {
-            return middleOfMill(color: color, node: node) || edgeOfMill(color: color, node: node)
+    // Checks if a piece forms a mill with a neighbour and that neighbour's neighbour in a given direction.
+    // Only called by the edgeOfMill() function.
+    private func checkDirection(color: Color, direction: Direction, node: Node, found: Int = 1) -> Bool {
+        if found == 3 {
+            return true
+        }
+
+        if let neighbour = node.getNeighbour(direction: direction), let neighbourNode = nodes[neighbour] {
+            return neighbourNode.state == .occupied(by: color) && checkDirection(color: color, direction: direction, node: neighbourNode, found: found + 1)
         }
 
         return false
