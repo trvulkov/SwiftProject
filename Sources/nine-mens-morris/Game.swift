@@ -12,8 +12,8 @@ extension Game: CustomStringConvertible {
     // allows the printing of information about the game at it's current stage - information about the players' pieces, and the state of the board itself
     var description: String {
         return """
-        white: \(white.free) free, \(white.placed) placed, at \(white.positions)
-        black: \(black.free) free, \(black.placed) placed, at \(black.positions)
+        white: \(white.free) unplaced, \(white.placed) placed, at \(white.positions)
+        black: \(black.free) unplaced, \(black.placed) placed, at \(black.positions)
         \(board)
         """
     }
@@ -25,7 +25,7 @@ extension Game { // game actions
     // Catches that function's exceptions and prints an approriate message if any one is caught.
     // If the placement is successful, calls the Pieces.place() function of the current player and returns the position.
     func place() -> String {
-        print("\(current) player, input coordinates to place piece at:")
+        print("\(current) player, input coordinates of a position to place the piece at:")
 
         while true {
             if let position = readLine() {
@@ -57,7 +57,7 @@ extension Game { // game actions
     // Catches that function's exceptions and prints an approriate message if any one is caught.
     // If the movement is successful, calls the Pieces.move() function of the current player and returns the second position.
     func move() -> String {
-        print("\(current) player, input coordinates of position to move piece from, and position to move piece to:")
+        print("\(current) player, input coordinates of a position to move the piece from, and a position to move the piece to:")
 
         while true {
             if let positions = readLine() {
@@ -107,13 +107,15 @@ extension Game { // game actions
     // Catches that function's exceptions and prints an approriate message if any one is caught.
     // If the removal is successful, calls the Pieces.remove() function of the other player.
     func remove() {
-        print("\(current) player formed a mill - input coordinates to remove opponent's piece from:")
+        print("\(current) player formed a mill - input coordinates of a position to remove the opponent's piece from:")
 
         while true {
             if let position = readLine() {
                 do {
-                    var checkForMill = true
-                    switch current { // if all of a player's pieces are in a mill, they can be removed without issue
+                    var checkForMill: Bool
+                    // If all of a player's pieces are in a mill, they can be removed without issue, so checkForMill is false. 
+                    // Otherwise, only pieces not in a mill can be removed, so checkForMill is true.
+                    switch current { 
                         case .white: checkForMill = !black.positions.allSatisfy{ board.inMill(color: .black, position: $0) }
                         case .black: checkForMill = !white.positions.allSatisfy{ board.inMill(color: .white, position: $0) }
                     }
