@@ -66,6 +66,7 @@ extension Board { // game logic - manipulating pieces
 
     // Moves a piece of a given color between two positions
     // (if either of the positions isn't on the board, the first one isn't occupied by a piece of the given color, or the second one isn't empty - an exception is thrown).
+    // The boolean argument determines whether the piece can "fly" - if not, a check is made for adjacency between the positions (and an exception is thrown if it fails).
     func move(color: Color, from: String, to: String, flying: Bool = false) throws {
         guard let start = nodes[from] else {
             throw MovingError.invalidMoveFrom
@@ -103,6 +104,7 @@ extension Board { // game logic - manipulating pieces
         guard node.state == .occupied(by: color.other) else {
             throw RemovingError.removeFromWrongColor
         }
+
         if checkForMill {
             guard inMill(color: color.other, position: position) == false else {
                 throw RemovingError.removeFromMill
@@ -127,7 +129,7 @@ extension Board { // game logic - manipulating pieces
 }
 
 extension Board { // game logic - mills
-    // Checks if a piece is in the middle of mill, i.e. if it forms a mill with two of it's neighbours (either the ones to the left and to the right, ot above and below).
+    // Checks if a piece is in the middle of mill, i.e. if it forms a mill with two of it's neighbours (either the ones to the left and to the right, or above and below).
     // Only called by the inMill() function.
     private func middleOfMill(color: Color, node: Node) -> Bool {
         if let left = node.left, let leftNode = nodes[left], let right = node.right, let rightNode = nodes[right] {
