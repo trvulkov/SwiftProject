@@ -25,7 +25,7 @@ extension Game { // game actions
     // Catches that function's exceptions and prints an approriate message if any one is caught.
     // If the placement is successful, calls the Pieces.place() function of the current player and returns the position.
     func place() -> String {
-        print("\(current) player, input coordinates of a position to place the piece at:")
+        print("\(current) player, PLACE your piece:")
 
         while true {
             if let position = readLine() {
@@ -57,7 +57,7 @@ extension Game { // game actions
     // Catches that function's exceptions and prints an approriate message if any one is caught.
     // If the movement is successful, calls the Pieces.move() function of the current player and returns the second position.
     func move() -> String {
-        print("\(current) player, input coordinates of a position to move the piece from, and a position to move the piece to:")
+        print("\(current) player, MOVE your piece:")
 
         while true {
             if let positions = readLine() {
@@ -107,7 +107,7 @@ extension Game { // game actions
     // Catches that function's exceptions and prints an approriate message if any one is caught.
     // If the removal is successful, calls the Pieces.remove() function of the other player.
     func remove() {
-        print("\(current) player formed a mill - input coordinates of a position to remove the opponent's piece from:")
+        print("\(current) player - REMOVE opponent's piece:")
 
         while true {
             if let position = readLine() {
@@ -179,7 +179,7 @@ extension Game { // game loop
     func loop() {
         var finishedReading = false
         repeat {
-            print("Who should move first? white/black")
+            print("Who should move first? (white or black)")
             if let line = readLine() {
                 switch line {
                     case "white": 
@@ -194,22 +194,44 @@ extension Game { // game loop
             }
         } while finishedReading == false
 
+        print("""
+        INSTRUCTIONS:
+        At the start of every turn, the board is printed, with the occupied positions marked 
+        by ○ for white pieces and ● for black pieces.
+
+        Depending on the phase of the game, the players are asked to input coordinates of positions:
+        - during the placement phase, input the coordinates of a single position (e.g. "a7") to place a piece there. 
+        The position should be unoccupied.
+        - during the movement phase, input the coordinates of two positions (e.g. "a7a4") to move a piece from the first to the second.
+        The first position should have a piece of your color, and the second should be adjacent to it and unoccupied. 
+        If you have only 3 pieces left however, you can move to non-adjacent positions.
+
+        If a mill is formed at any point, a message will be printed and you will need to input the coordinates of a single position,
+        from which to remove a piece belonging to your opponent.
+
+        In the case of invalid input (positions that don't exist, placing on already occupied positions, moving your opponent's pieces, etc.)
+        an appropriate error message is printed and the turn is repeated (until correct input is given).
+        """)
+
         while phase == .placing || (phase == .moving && canPlay(.white) && canPlay(.black)) {
             print(self)
 
-            var res: String
+            var position: String
             switch phase {
                 case .placing:
-                    res = place()
+                    position = place()
                 case .moving:
-                    res = move()
+                    position = move()
             }
 
-            if board.inMill(color: current, position: res) {
+            if board.inMill(color: current, position: position) {
                 print(self)
+                print("\(current) player FORMED A MILL!")
+
                 remove()
             }
 
+            // change player for next turn
             current = current.other
 
             if white.free == 0 && black.free == 0 {
@@ -219,15 +241,15 @@ extension Game { // game loop
 
         print(self)
         if white.placed == 2 {
-            print("Victory for black player - white player has less than 3 pieces!")
+            print("VICTORY for BLACK player - white player has less than 3 pieces!")
         } else if black.placed == 2 {
-            print("Victory for white player - black player has less than 3 pieces!")
+            print("VICTORY for WHITE player - black player has less than 3 pieces!")
         } else if canMove(.white) == false && canMove(.black)  {
-            print("Victory for black player - white player cannot move their pieces!")
+            print("VICTORY for BLACK player - white player cannot move their pieces!")
         } else if canMove(.white) && canMove(.black) == false {
-            print("Victory for white player - black player cannot move their pieces!")
+            print("VICTORY for WHITE player - black player cannot move their pieces!")
         } else if canMove(.white) == false && canMove(.black) == false {
-            print("Draw - neither player can move their pieces!")
+            print("DRAW - neither player can move their pieces!")
         }
     }
 
