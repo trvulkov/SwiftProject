@@ -1,6 +1,4 @@
-Проект - "Дама" 
-проект №1
-
+# Проект - "Дама": проект №1
 # nine-mens-morris
 
 Nine men's morris, played through the command-line interface.
