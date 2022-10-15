@@ -1,4 +1,4 @@
-# University Project for the Swift elective course in FMI, 2nd Semester 2019/2020
+# University Project for the Swift elective course in FMI (Sofia University), 2nd Semester 2019/2020
 
 Nine men's morris, played through the command-line interface.
 
